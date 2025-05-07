@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jogo da memória</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Jogo da Memória</h1>
+    <div class="tabuleiro" id="tabuleiro"></div>
+    <button class="botao-reiniciar" onclick="reiniciarJogo()">Reiniciar Jogo</button>
+    <script>
+        const icones = ['🍎', '🍌', '🍒', '🍇', '🍓', '🍍', '🥝', '🍉'];
+        let cartas = [...icones, ...icones]; // Duas cópias de cada ícone
+        let cartaVirada = null;
+        let bloqueio = false;
+
+        // Função para embaralhar as cartas
+        function embaralhar(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Função para criar o tabuleiro
+        function criarTabuleiro() {
+            const tabuleiro = document.getElementById('tabuleiro');
+            tabuleiro.innerHTML = ''; // Limpa o tabuleiro
+            embaralhar(cartas);
+
+            cartas.forEach((icone, index) => {
+                const carta = document.createElement('div');
+                carta.classList.add('carta');
+                carta.dataset.icone = icone;
+
+                carta.innerHTML = `<span class="conteudo">${icone}</span>`;
+                carta.addEventListener('click', virarCarta);
+
+                tabuleiro.appendChild(carta);
+            });
+        }
+
+        // Função para virar uma carta
+        function virarCarta() {
+            if (bloqueio || this.classList.contains('virada')) return;
+
+            this.classList.add('virada');
+
+            if (!cartaVirada) {
+                cartaVirada = this;
+                return;
+            }
+
+            const cartaAtual = this;
+            verificarPar(cartaAtual);
+        }
+
+        // Verifica se as cartas formam um par
+        function verificarPar(cartaAtual) {
+            bloqueio = true;
+
+            if (cartaAtual.dataset.icone === cartaVirada.dataset.icone) {
+                cartaAtual.classList.add('pareada');
+                cartaVirada.classList.add('pareada');
+                resetarEstado();
+            } else {
+                setTimeout(() => {
+                    cartaAtual.classList.remove('virada');
+                    cartaVirada.classList.remove('virada');
+                    resetarEstado();
+                }, 1000);
+            }
+        }
+
+        // Reseta o estado das cartas
+        function resetarEstado() {
+            [cartaVirada, bloqueio] = [null, false];
+        }
+
+        // Reinicia o jogo
+        function reiniciarJogo() {
+            cartaVirada = null;
+            bloqueio = false;
+            criarTabuleiro();
+        }
+
+        // Inicializa o jogo
+        criarTabuleiro();
+    </script>
+</body>
+</html>
